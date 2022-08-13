@@ -4,13 +4,14 @@ import (
 	"context"
 
 	"github.com/PabloRosalesJ/go/rest-ws/models"
+	_ "github.com/lib/pq"
 )
 
 var implementation UserRepository
 
 type UserRepository interface {
 	InsertUser(ctx context.Context, user *models.User) error
-	GetUserById(ctx context.Context, id uint64) (*models.User, error)
+	GetUserById(ctx context.Context, id string) (*models.User, error)
 	Close() error
 }
 
@@ -22,7 +23,7 @@ func InsertUser(ctx context.Context, user *models.User) error {
 	return implementation.InsertUser(ctx, user)
 }
 
-func GetUserById(ctx context.Context, id uint64) (*models.User, error) {
+func GetUserById(ctx context.Context, id string) (*models.User, error) {
 	return implementation.GetUserById(ctx, id)
 }
 
