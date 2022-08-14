@@ -70,7 +70,7 @@ func (repo *PostgresRepository) GetUserByEmail(ctx context.Context, email string
 	var user = models.User{}
 
 	for rows.Next() {
-		if err := rows.Scan(&user.Email, &user.Id, &user.Password); err != nil {
+		if err := rows.Scan(&user.Id, &user.Email, &user.Password); err != nil {
 			log.Fatal("GetUserByEmail.next", err)
 		}
 	}
