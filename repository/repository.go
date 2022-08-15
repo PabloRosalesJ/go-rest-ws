@@ -7,17 +7,22 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var implementation UserRepository
+var implementation Repository
 
-type UserRepository interface {
+type Repository interface {
 	InsertUser(ctx context.Context, user *models.User) error
 	GetUserById(ctx context.Context, id string) (*models.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+
+	/* ============ POST ============ */
+
+	InsertPost(ctx context.Context, post *models.Post) error
+
 	Close() error
 }
 
-func SetRepository(repository UserRepository) {
-	implementation = repository
+func SetRepository(repo Repository) {
+	implementation = repo
 }
 
 func InsertUser(ctx context.Context, user *models.User) error {
@@ -31,6 +36,14 @@ func GetUserById(ctx context.Context, id string) (*models.User, error) {
 func GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	return implementation.GetUserByEmail(ctx, email)
 }
+
+/* ============ POST ============ */
+
+func InsertPost(ctx context.Context, post *models.Post) error {
+	return implementation.InsertPost(ctx, post)
+}
+
+/* ============ Global ============ */
 
 func Close() error {
 	return implementation.Close()

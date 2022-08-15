@@ -82,6 +82,13 @@ func (repo *PostgresRepository) GetUserByEmail(ctx context.Context, email string
 	return &user, nil
 }
 
+/* ============ POST ============ */
+
+func (repo *PostgresRepository) InsertPost(ctx context.Context, post *models.Post) error {
+	_, err := repo.db.ExecContext(ctx, "INSERT INTO posts (id, user_id, post_content) values ($1, $2, $3)", post.Id, post.UserId, post.PostContent)
+	return err
+}
+
 func (repo *PostgresRepository) Close() error {
 	return repo.db.Close()
 }
