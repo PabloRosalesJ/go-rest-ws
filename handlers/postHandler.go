@@ -5,9 +5,11 @@ import (
 	"net/http"
 
 	"github.com/PabloRosalesJ/go/rest-ws/helpers"
+	apiResponse "github.com/PabloRosalesJ/go/rest-ws/helpers/api"
 	"github.com/PabloRosalesJ/go/rest-ws/models"
 	"github.com/PabloRosalesJ/go/rest-ws/repository"
 	"github.com/PabloRosalesJ/go/rest-ws/server"
+	"github.com/gorilla/mux"
 	"github.com/segmentio/ksuid"
 )
 
@@ -67,5 +69,22 @@ func CreatePostHandler(s server.Server) http.HandlerFunc {
 			},
 		})
 	}
+}
 
+func GetPostById(s server.Server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		post, err := repository.GetPostById(r.Context(), params["id"])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if post == nil {
+			apiResponse.ResponseOk(w, 404, "Model not found")
+			return
+		}
+
+		apiResponse.ResponseOk(w, 200, post)
+	}
 }

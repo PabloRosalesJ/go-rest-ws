@@ -89,6 +89,34 @@ func (repo *PostgresRepository) InsertPost(ctx context.Context, post *models.Pos
 	return err
 }
 
+func (repo *PostgresRepository) GetPostById(ctx context.Context, id string) (*models.Post, error) {
+	rows, err := repo.db.QueryContext(ctx, "SELECT id, user_id, post_content, created_at FROM posts where id = $1", id)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
+
+	var post = models.Post{}
+
+	for rows.Next() {
+		if err = rows.Scan(&post.Id, &post.UserId, &post.PostContent, &post.CreatedAt); err == nil {
+			return &post, nil
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		return &post, nil
+	}
+
+	return nil, nil
+}
+
 func (repo *PostgresRepository) Close() error {
 	return repo.db.Close()
 }
