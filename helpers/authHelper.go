@@ -11,6 +11,8 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
+const UNAUTHORIZED string = "Unauthorized"
+
 func AuthUser(s server.Server, w http.ResponseWriter, r *http.Request) (models.User, error) {
 	tokenString := strings.TrimSpace(r.Header.Get("Authorization"))
 	token, err := jwt.ParseWithClaims(tokenString, &models.AppClaims{}, func(t *jwt.Token) (interface{}, error) {
@@ -37,5 +39,21 @@ func AuthUser(s server.Server, w http.ResponseWriter, r *http.Request) (models.U
 	} else {
 		return user, err
 	}
+}
 
+func AuthUserId(s server.Server, r *http.Request) (*models.AppClaims, error) {
+	tokenString := strings.TrimSpace(r.Header.Get("Authorization"))
+
+	token, err := jwt.ParseWithClaims(tokenString, &models.AppClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(s.Config().JWTSecret), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(*models.AppClaims); ok && token.Valid {
+		return claims, nil
+	}
+	return nil, errors.New(UNAUTHORIZED)
 }

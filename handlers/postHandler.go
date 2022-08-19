@@ -88,3 +88,33 @@ func GetPostById(s server.Server) http.HandlerFunc {
 		apiResponse.ResponseOk(w, 200, post)
 	}
 }
+
+func UpdatePost(s server.Server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		claims, err := helpers.AuthUserId(s, r)
+		if err != nil {
+			apiResponse.ResponseErr(w, http.StatusInternalServerError, err.Error(), []string{})
+			return
+		}
+
+		userId := claims.UserId
+		postId := mux.Vars(r)["id"]
+		var request = PostRequest{}
+
+		err = json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			apiResponse.ResponseErr(w, http.StatusBadRequest, "Invalid request", []string{err.Error()})
+			return
+		}
+
+		err = repository.UpdatePost(r.Context(), postId, userId, request.PostContent)
+
+		if err != nil {
+			apiResponse.ResponseErr(w, http.StatusInternalServerError, err.Error(), []string{})
+			return
+		}
+
+		apiResponse.ResponseOk(w, http.StatusOK, "Update successfull")
+	}
+
+}
