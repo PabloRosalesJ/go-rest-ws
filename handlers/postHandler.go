@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/PabloRosalesJ/go/rest-ws/helpers"
 	apiResponse "github.com/PabloRosalesJ/go/rest-ws/helpers/api"
@@ -116,5 +117,30 @@ func UpdatePost(s server.Server) http.HandlerFunc {
 
 		apiResponse.ResponseOk(w, http.StatusOK, "Update successfull")
 	}
+}
 
+func GetPostList(s server.Server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var prePage = uint64(30)
+		prePageTxt := r.URL.Query().Get("prePage")
+		if prePageTxt != "" {
+			prePage, _ = strconv.ParseUint(prePageTxt, 10, 32)
+			// fmt.Println(prePage)
+		}
+
+		var page = uint64(1)
+		pageTxt := r.URL.Query().Get("page")
+		if pageTxt != "" {
+			page, _ = strconv.ParseUint(pageTxt, 10, 32)
+			// fmt.Println(page)
+		}
+
+		list, err := repository.ListPosts(r.Context(), uint32(page)-1, uint(prePage))
+		if err != nil {
+			apiResponse.ResponseErr(w, http.StatusInternalServerError, err.Error(), []string{})
+			return
+		}
+
+		apiResponse.ResponseOk(w, http.StatusOK, list)
+	}
 }

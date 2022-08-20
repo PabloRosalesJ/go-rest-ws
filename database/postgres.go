@@ -122,6 +122,40 @@ func (repo *PostgresRepository) UpdatePost(ctx context.Context, postId string, u
 	return err
 }
 
+func (repo *PostgresRepository) ListPosts(ctx context.Context, page uint32, prePage uint) ([]*models.Post, error) {
+	rows, err := repo.db.QueryContext(
+		ctx,
+		"SELECT id, post_content, user_id, created_at FROM posts ORDER BY created_at ASC LIMIT $1 OFFSET $2",
+		prePage,
+		page*uint32(prePage),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	var posts []*models.Post
+
+	for rows.Next() {
+		var post = models.Post{}
+		err = rows.Scan(&post.Id, &post.PostContent, &post.UserId, &post.CreatedAt)
+		posts = append(posts, &post)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, err
+}
+
 func (repo *PostgresRepository) Close() error {
 	return repo.db.Close()
 }

@@ -19,6 +19,7 @@ type Repository interface {
 	InsertPost(ctx context.Context, post *models.Post) error
 	GetPostById(ctx context.Context, id string) (*models.Post, error)
 	UpdatePost(ctx context.Context, postId string, userId string, content string) error
+	ListPosts(ctx context.Context, page uint32, prePage uint) ([]*models.Post, error)
 
 	Close() error
 }
@@ -51,6 +52,10 @@ func GetPostById(ctx context.Context, id string) (*models.Post, error) {
 
 func UpdatePost(ctx context.Context, postId string, userId string, content string) error {
 	return implementation.UpdatePost(ctx, postId, userId, content)
+}
+
+func ListPosts(ctx context.Context, page uint32, prePage uint) ([]*models.Post, error) {
+	return implementation.ListPosts(ctx, page, prePage)
 }
 
 /* ============ Global ============ */
